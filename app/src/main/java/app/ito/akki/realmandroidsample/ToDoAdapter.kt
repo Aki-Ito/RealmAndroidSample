@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import io.realm.OrderedRealmCollection
@@ -17,10 +18,13 @@ class ToDoAdapter (
     private val autoUpdate: Boolean
         ): RealmRecyclerViewAdapter<ToDo, ToDoAdapter.ViewHolder>(taskList, autoUpdate){
 
+    private lateinit var listener: OnCellClickListener
+
        class ViewHolder(view: View): RecyclerView.ViewHolder(view){
            val subjectText: TextView = view.findViewById(R.id.subjectText)
            val contentText: TextView = view.findViewById(R.id.contentText)
            val dateText: TextView = view.findViewById(R.id.dateText)
+           var container: LinearLayout = view.findViewById(R.id.container)
 //           val timeText: TextView = view.findViewById(R.id.timeText)
        }
 
@@ -50,7 +54,17 @@ class ToDoAdapter (
 //        holder.dateText.text = dateToString
 //        holder.timeText.text = timeToString
         holder.dateText.text =  SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPANESE).format(toDo.dateTime)
+        holder.container.setOnClickListener {
+            listener.onItemClick(toDo)
+        }
+    }
 
+    interface OnCellClickListener{
+        fun onItemClick(item: ToDo)
+    }
+
+    fun setOnItemCellClickListener(listener: OnCellClickListener){
+        this.listener = listener
     }
 
 

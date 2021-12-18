@@ -25,6 +25,16 @@ class MainActivity : AppCompatActivity(){
             val intent = Intent(this, AddToDoActivity::class.java)
             startActivity(intent)
         }
+
+        adapter.setOnItemCellClickListener(
+            object: ToDoAdapter.OnCellClickListener
+        {
+            override fun onItemClick(item: ToDo){
+                val toAddActivity = Intent(this@MainActivity, AddToDoActivity::class.java)
+                toAddActivity.putExtra("itemID", item.id)
+                startActivity(toAddActivity)
+            }
+        })
     }
 
    fun readAll(): RealmResults<ToDo>{
@@ -33,6 +43,4 @@ class MainActivity : AppCompatActivity(){
        //Returns a sequence of all occurrences of a regular expression within the input string, beginning at the specified startIndex.
         return realm.where(ToDo::class.java).findAll()
    }
-
-
 }

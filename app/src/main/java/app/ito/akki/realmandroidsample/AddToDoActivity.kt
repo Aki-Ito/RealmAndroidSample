@@ -29,6 +29,19 @@ class AddToDoActivity : AppCompatActivity(), DatePickerDialogClass.OnSelectedDat
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_to_do)
 
+        val itemId = intent.getStringExtra("itemID")
+
+        if (itemId != null){
+            val toDoItem: ToDo? = realm.where(ToDo::class.java)
+                .equalTo("id", itemId)
+                .findFirst()
+
+            subjectEditText.setText(toDoItem?.subject)
+            ContentEditText.setText(toDoItem?.content)
+        }
+
+
+
         datePickButton.setOnClickListener {
             showDatePickerDialog()
         }
@@ -40,18 +53,48 @@ class AddToDoActivity : AppCompatActivity(), DatePickerDialogClass.OnSelectedDat
         saveButton.setOnClickListener {
             if (yearSaved != null && monthSaved != null && dateSaved != null && hourSaved != null && minuteSaved != null){
                 realm.executeTransaction {
-                    val newToDo: ToDo = it.createObject(ToDo::class.java, UUID.randomUUID().toString())
-                    newToDo.subject = subjectEditText.text.toString()
-                    newToDo.content = ContentEditText.text.toString()
-//                    newToDo.year = yearSaved as Int
-//                    newToDo.month = monthSaved as Int
-//                    newToDo.day = dateSaved as Int
-//                    newToDo.hour = hourSaved as Int
-//                    newToDo.minute = minuteSaved as Int
-                    val intToDateTime: LocalDateTime = LocalDateTime.of(yearSaved!!,monthSaved!!,dateSaved!!,hourSaved!!,minuteSaved!!)
-                    val zdt = intToDateTime.atZone(ZoneId.systemDefault());
-                    val date = Date.from(zdt.toInstant())
-                    newToDo.dateTime = date
+
+                    val itemId = intent.getStringExtra("itemID")
+
+
+
+                    if (itemId != null){
+
+                        val toDoItem: ToDo? = realm.where(ToDo::class.java)
+                            .equalTo("id", itemId)
+                            .findFirst()
+
+                        toDoItem?.subject = subjectEditText.text.toString()
+                        toDoItem?.content = ContentEditText.text.toString()
+
+                        val intToDateTime: LocalDateTime = LocalDateTime.of(
+                            yearSaved!!,
+                            monthSaved!!,
+                            dateSaved!!,
+                            hourSaved!!,
+                            minuteSaved!!
+                        )
+                        val zdt = intToDateTime.atZone(ZoneId.systemDefault());
+                        val date = Date.from(zdt.toInstant())
+                        toDoItem?.dateTime = date
+
+                    } else {
+                        val newToDo: ToDo =
+                            it.createObject(ToDo::class.java, UUID.randomUUID().toString())
+                        newToDo.subject = subjectEditText.text.toString()
+                        newToDo.content = ContentEditText.text.toString()
+//
+                        val intToDateTime: LocalDateTime = LocalDateTime.of(
+                            yearSaved!!,
+                            monthSaved!!,
+                            dateSaved!!,
+                            hourSaved!!,
+                            minuteSaved!!
+                        )
+                        val zdt = intToDateTime.atZone(ZoneId.systemDefault());
+                        val date = Date.from(zdt.toInstant())
+                        newToDo.dateTime = date
+                    }
 
                 }
             }
@@ -59,7 +102,11 @@ class AddToDoActivity : AppCompatActivity(), DatePickerDialogClass.OnSelectedDat
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
 
+        realm.close()
+    }
 
     private fun showDatePickerDialog(){
         val datePickerDialogClass = DatePickerDialogClass()
